@@ -124,8 +124,9 @@ export default function TerminalDashboard({
     );
   }
 
-  const pendingAlerts =
-    recentAlerts?.items?.filter((a) => a.status === "pending") || [];
+  const pendingAlerts = (
+    recentAlerts?.items?.filter((a) => a.status === "pending") || []
+  ).sort((a, b) => b.risk_score - a.risk_score);
   const chartData = dailyVolume ? toChartData(dailyVolume) : [];
 
   return (
@@ -367,7 +368,7 @@ export default function TerminalDashboard({
                           fontWeight="bold"
                           textShadow="0 0 4px rgba(0, 255, 65, 0.3)"
                         >
-                          {alert.id.slice(0, 12)}
+                          {alert.reference_number || alert.id.slice(0, 8)}
                         </Text>
                       </HStack>
                       <Text
@@ -392,7 +393,8 @@ export default function TerminalDashboard({
                       </Text>
                     </Flex>
                     <Text fontSize="2xs" color="rgba(0, 255, 65, 0.4)">
-                      CID: {alert.customer_id}
+                      CID:{" "}
+                      {alert.transaction?.account_number || alert.customer_id}
                     </Text>
                   </Box>
                 ))}

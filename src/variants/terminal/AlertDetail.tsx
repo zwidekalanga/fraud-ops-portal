@@ -178,7 +178,7 @@ export default function TerminalAlertDetail({
                 color="#00FF41"
                 textShadow="0 0 8px rgba(0, 255, 65, 0.4)"
               >
-                {">"} cat /alerts/{alert.id}
+                {">"} cat /alerts/{alert.reference_number || alert.id}
               </Text>
               <Text
                 fontSize="2xs"
@@ -578,10 +578,13 @@ export default function TerminalAlertDetail({
                           }
                           fontWeight={customer?.full_name ? "normal" : "bold"}
                         >
-                          {alert.customer_id}
+                          {alert.transaction?.account_number ||
+                            alert.customer_id}
                         </Text>
                         <Text fontSize="2xs" color="#FFB000">
-                          TIER: {customer?.tier?.toUpperCase() || "N/A"}
+                          ACCOUNT:{" "}
+                          {customer?.primary_account_type?.toUpperCase() ||
+                            "N/A"}
                         </Text>
                       </Box>
                     </HStack>
@@ -841,7 +844,7 @@ export default function TerminalAlertDetail({
                     textAlign="left"
                   >
                     <Text mb="1">
-                      REVIEWED_BY: {alert.reviewed_by || "SYSTEM"}
+                      REVIEWED_BY: {alert.reviewed_by_username || "SYSTEM"}
                     </Text>
                     <Text mb="1">
                       REVIEWED_AT:{" "}

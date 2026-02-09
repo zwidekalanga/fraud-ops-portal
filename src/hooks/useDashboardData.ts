@@ -22,7 +22,13 @@ export function useDashboardData(): DashboardData {
 
   const { data: recentAlerts, isLoading: alertsLoading } = useQuery({
     queryKey: ["recent-alerts"],
-    queryFn: () => api.getAlerts({ size: 5 }),
+    queryFn: () =>
+      api.getAlerts({
+        status: "pending",
+        sort_by: "risk_score",
+        sort_order: "desc",
+        size: 20,
+      }),
   });
 
   const { data: dailyVolume, isLoading: volumeLoading } = useQuery({

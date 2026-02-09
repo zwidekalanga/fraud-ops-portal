@@ -167,8 +167,9 @@ export default function BrutalistDashboard({
     );
   }
 
-  const pendingAlerts =
-    recentAlerts?.items?.filter((a) => a.status === "pending") || [];
+  const pendingAlerts = (
+    recentAlerts?.items?.filter((a) => a.status === "pending") || []
+  ).sort((a, b) => b.risk_score - a.risk_score);
   const chartData = dailyVolume ? toChartData(dailyVolume) : [];
 
   return (
@@ -438,7 +439,7 @@ export default function BrutalistDashboard({
               </Flex>
             ) : (
               <Box display="flex" flexDirection="column">
-                {pendingAlerts.slice(0, 6).map((alert, i) => (
+                {pendingAlerts.slice(0, 5).map((alert, i) => (
                   <Box
                     key={alert.id}
                     onClick={() => navigate({ to: `/alerts/${alert.id}` })}
@@ -478,7 +479,7 @@ export default function BrutalistDashboard({
                           fontFamily="'JetBrains Mono', monospace"
                           textTransform="uppercase"
                         >
-                          {alert.id.slice(0, 12)}
+                          {alert.reference_number || alert.id.slice(0, 8)}
                         </Text>
                         <Text
                           fontSize="2xs"
@@ -487,7 +488,8 @@ export default function BrutalistDashboard({
                           fontFamily="'JetBrains Mono', monospace"
                           fontWeight="600"
                         >
-                          {alert.customer_id}
+                          {alert.transaction?.account_number ||
+                            alert.customer_id}
                         </Text>
                       </Box>
                     </HStack>

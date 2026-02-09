@@ -163,6 +163,7 @@ export default function BrutalistAlerts(props: AlertsListData) {
                   <option value="pending">PENDING</option>
                   <option value="confirmed">CONFIRMED</option>
                   <option value="dismissed">DISMISSED</option>
+                  <option value="escalated">ESCALATED</option>
                 </Box>
               </Box>
               <Box>
@@ -181,7 +182,7 @@ export default function BrutalistAlerts(props: AlertsListData) {
                   <Box
                     as="input"
                     type="text"
-                    placeholder="CUSTOMER ID..."
+                    placeholder="ACCOUNT NUMBER..."
                     w="full"
                     bg="#FAFAFA"
                     border="3px solid #000"
@@ -374,9 +375,10 @@ export default function BrutalistAlerts(props: AlertsListData) {
                   {[
                     "#",
                     "ALERT ID",
-                    "CUSTOMER",
+                    "ACCOUNT",
                     "TRIGGERS",
                     "SCORE",
+                    "REVIEWED BY",
                     "STATUS",
                   ].map((h, i) => (
                     <Box
@@ -390,7 +392,7 @@ export default function BrutalistAlerts(props: AlertsListData) {
                       textTransform="uppercase"
                       letterSpacing="widest"
                       fontFamily="'JetBrains Mono', monospace"
-                      textAlign={i === 0 || i === 5 ? "center" : "left"}
+                      textAlign={i === 0 || i === 6 ? "center" : "left"}
                       w={i === 0 ? "16" : undefined}
                     >
                       {h}
@@ -401,7 +403,7 @@ export default function BrutalistAlerts(props: AlertsListData) {
               <Box as="tbody">
                 {data?.items?.length === 0 ? (
                   <Box as="tr">
-                    <Box as="td" colSpan={7} px="6" py="24" textAlign="center">
+                    <Box as="td" colSpan={8} px="6" py="24" textAlign="center">
                       <Flex direction="column" align="center">
                         <Box bg="#000" p="4" mb="4" border="3px solid #000">
                           <Icon boxSize="8" color="#FACC15">
@@ -480,7 +482,7 @@ export default function BrutalistAlerts(props: AlertsListData) {
                             fontSize="sm"
                             fontFamily="'JetBrains Mono', monospace"
                           >
-                            {alert.id.slice(0, 12)}
+                            {alert.reference_number || alert.id.slice(0, 8)}
                           </Text>
                           <Text
                             fontSize="2xs"
@@ -511,7 +513,10 @@ export default function BrutalistAlerts(props: AlertsListData) {
                             mr="2"
                             border="2px solid #000"
                           >
-                            {alert.customer_id.substring(5, 7)}
+                            {(
+                              alert.transaction?.account_number ||
+                              alert.customer_id
+                            ).slice(-2)}
                           </Box>
                           <Text
                             color="#000"
@@ -519,7 +524,8 @@ export default function BrutalistAlerts(props: AlertsListData) {
                             fontSize="sm"
                             fontFamily="'JetBrains Mono', monospace"
                           >
-                            {alert.customer_id}
+                            {alert.transaction?.account_number ||
+                              alert.customer_id}
                           </Text>
                         </HStack>
                       </Box>
@@ -577,6 +583,31 @@ export default function BrutalistAlerts(props: AlertsListData) {
                             {alert.risk_score}
                           </Text>
                         </HStack>
+                      </Box>
+                      <Box as="td" px="5" py="4">
+                        <Text
+                          fontWeight="700"
+                          color="#000"
+                          fontSize="xs"
+                          fontFamily="'JetBrains Mono', monospace"
+                        >
+                          {alert.reviewed_by_username || "System"}
+                        </Text>
+                        <Text
+                          fontSize="2xs"
+                          color="#000"
+                          opacity={0.4}
+                          fontWeight="600"
+                          fontFamily="'JetBrains Mono', monospace"
+                          mt="0.5"
+                        >
+                          {alert.reviewed_at
+                            ? format(
+                                new Date(alert.reviewed_at),
+                                "dd/MM/yyyy | HH:mm",
+                              )
+                            : "—"}
+                        </Text>
                       </Box>
                       <Box as="td" px="5" py="4" textAlign="center">
                         <BrutalistStatusBadge status={alert.status} />

@@ -197,7 +197,7 @@ export default function BrutalistAlertDetail({
               fontWeight="600"
               mt="1"
             >
-              {">"} {alert.id}
+              {">"} {alert.reference_number || alert.id}
             </Text>
           </Box>
         </HStack>
@@ -771,7 +771,8 @@ export default function BrutalistAlertDetail({
                           fontFamily="'JetBrains Mono', monospace"
                           opacity={customer?.full_name ? 0.5 : 1}
                         >
-                          {alert.customer_id}
+                          {alert.transaction?.account_number ||
+                            alert.customer_id}
                         </Text>
                         <Text
                           fontSize="2xs"
@@ -785,7 +786,8 @@ export default function BrutalistAlertDetail({
                           display="inline-block"
                           mt="1"
                         >
-                          {customer?.tier || "N/A"}
+                          {customer?.primary_account_type?.toUpperCase() ||
+                            "N/A"}
                         </Text>
                       </Box>
                     </Flex>
@@ -1157,7 +1159,7 @@ export default function BrutalistAlertDetail({
                       textAlign="left"
                     >
                       <Text fontWeight="800" mb="1">
-                        Reviewed by: {alert.reviewed_by || "System"}
+                        Reviewed by: {alert.reviewed_by_username || "System"}
                       </Text>
                       <Text fontSize="2xs" opacity={0.5} mb="2">
                         {alert.reviewed_at

@@ -56,7 +56,7 @@ export function useAlertsList(): AlertsListData {
     setSearch(e.target.value);
     setFilters((prev) => ({
       ...prev,
-      customer_id: e.target.value || undefined,
+      account_number: e.target.value || undefined,
       page: 1,
     }));
   };

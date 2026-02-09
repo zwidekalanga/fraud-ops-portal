@@ -27,6 +27,7 @@ export interface TriggeredRule {
 
 export interface AlertTransaction {
   external_id: string;
+  account_number: string | null;
   amount: number;
   currency: string;
   transaction_type: string;
@@ -40,6 +41,7 @@ export type DecisionTier = "APPROVE" | "REVIEW" | "FLAG";
 
 export interface FraudAlert {
   id: string;
+  reference_number: string | null;
   transaction_id: string;
   customer_id: string;
   risk_score: number;
@@ -50,6 +52,7 @@ export interface FraudAlert {
   triggered_rules: TriggeredRule[];
   processing_time_ms: number | null;
   reviewed_by: string | null;
+  reviewed_by_username: string | null;
   reviewed_at: string | null;
   review_notes: string | null;
   created_at: string;
@@ -67,12 +70,14 @@ export interface PaginatedResponse<T> {
 
 export interface AlertFilters {
   status?: string;
-  customer_id?: string;
+  account_number?: string;
   min_score?: number;
   max_score?: number;
   decision?: string;
   from_date?: string;
   to_date?: string;
+  sort_by?: "created_at" | "risk_score" | "updated_at";
+  sort_order?: "asc" | "desc";
   page?: number;
   size?: number;
 }
@@ -115,6 +120,8 @@ export interface CustomerSummary {
   total_spend_30d: string;
   avg_transaction_amount: string;
   risk_rating: string;
+  primary_account_number: string | null;
+  primary_account_type: string | null;
 }
 
 // API Clients — fraud-detection for domain APIs, core-banking for auth
@@ -321,11 +328,11 @@ export const api = {
   },
 
   getDailyVolume: async (days = 7): Promise<DailyVolume[]> => {
-    const response = await apiClient.get<DailyVolume[]>(
-      "/alerts/stats/daily-volume",
-      { params: { days } },
-    );
-    return response.data;
+    const response = await apiClient.get<{
+      items: DailyVolume[];
+      days: number;
+    }>("/alerts/stats/daily-volume", { params: { days } });
+    return response.data.items;
   },
 
   // Health (root-level endpoint, not under /api/v1)

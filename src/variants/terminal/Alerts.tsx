@@ -131,6 +131,7 @@ export default function TerminalAlerts(props: AlertsListData) {
                   <option value="pending">PENDING REVIEW</option>
                   <option value="confirmed">CONFIRMED FRAUD</option>
                   <option value="dismissed">DISMISSED</option>
+                  <option value="escalated">ESCALATED</option>
                 </Box>
               </Box>
 
@@ -142,7 +143,7 @@ export default function TerminalAlerts(props: AlertsListData) {
                   mb="1"
                   letterSpacing="wider"
                 >
-                  {">"} SEARCH:CUSTOMER
+                  {">"} SEARCH:ACCOUNT
                 </Text>
                 <Box position="relative">
                   <Box
@@ -318,9 +319,10 @@ export default function TerminalAlerts(props: AlertsListData) {
                   {[
                     "#",
                     "ALERT_ID",
-                    "CUSTOMER",
+                    "ACCOUNT",
                     "RULES",
                     "SCORE",
+                    "REVIEWED_BY",
                     "STATUS",
                   ].map((h, i) => (
                     <Box
@@ -333,7 +335,7 @@ export default function TerminalAlerts(props: AlertsListData) {
                       color="rgba(0, 255, 65, 0.4)"
                       textTransform="uppercase"
                       letterSpacing="widest"
-                      textAlign={i === 0 || i === 5 ? "center" : "left"}
+                      textAlign={i === 0 || i === 6 ? "center" : "left"}
                       w={i === 0 ? "14" : undefined}
                     >
                       {h}
@@ -344,7 +346,7 @@ export default function TerminalAlerts(props: AlertsListData) {
               <Box as="tbody">
                 {data?.items?.length === 0 ? (
                   <Box as="tr">
-                    <Box as="td" colSpan={7} px="4" py="16" textAlign="center">
+                    <Box as="td" colSpan={8} px="4" py="16" textAlign="center">
                       <Text color="rgba(0, 255, 65, 0.3)" fontSize="xs">
                         {">"} No results found. Adjust query parameters.
                       </Text>
@@ -398,7 +400,7 @@ export default function TerminalAlerts(props: AlertsListData) {
                           fontSize="xs"
                           textShadow="0 0 4px rgba(0, 255, 65, 0.3)"
                         >
-                          {alert.id.slice(0, 12)}
+                          {alert.reference_number || alert.id.slice(0, 8)}
                         </Text>
                         <Text
                           fontSize="2xs"
@@ -411,7 +413,8 @@ export default function TerminalAlerts(props: AlertsListData) {
                       </Box>
                       <Box as="td" px="4" py="3">
                         <Text color="rgba(0, 255, 65, 0.6)" fontSize="xs">
-                          {alert.customer_id}
+                          {alert.transaction?.account_number ||
+                            alert.customer_id}
                         </Text>
                       </Box>
                       <Box as="td" px="4" py="3">
@@ -448,6 +451,28 @@ export default function TerminalAlerts(props: AlertsListData) {
                           }
                         >
                           {alert.risk_score}
+                        </Text>
+                      </Box>
+                      <Box as="td" px="4" py="3">
+                        <Text
+                          fontWeight="bold"
+                          color="#00FF41"
+                          fontSize="xs"
+                          textShadow="0 0 4px rgba(0, 255, 65, 0.3)"
+                        >
+                          {alert.reviewed_by_username || "System"}
+                        </Text>
+                        <Text
+                          fontSize="2xs"
+                          color="rgba(0, 255, 65, 0.35)"
+                          mt="0.5"
+                        >
+                          {alert.reviewed_at
+                            ? format(
+                                new Date(alert.reviewed_at),
+                                "yyyy-MM-dd | HH:mm",
+                              )
+                            : "—"}
                         </Text>
                       </Box>
                       <Box as="td" px="4" py="3" textAlign="center">

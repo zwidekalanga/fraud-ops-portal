@@ -108,11 +108,12 @@ export const Route = createRootRoute({
 
 // Inline script to prevent FOUC: hides body until client resolves the template.
 // Only activates when there's no ?template= in the URL (i.e. localStorage lookup needed).
+// We apply opacity:0 via the style prop on <html> so SSR HTML matches hydration.
+// This script handles the conditional case where ?template= IS in the URL (skip hiding).
 const antiFlickerScript = `
 (function(){
-  if(!new URLSearchParams(window.location.search).get('template')){
-    document.documentElement.style.opacity='0';
-    document.documentElement.style.transition='opacity 0.15s';
+  if(new URLSearchParams(window.location.search).get('template')){
+    document.documentElement.style.opacity='1';
   }
 })();
 `;
@@ -181,7 +182,11 @@ function RootComponent() {
   }, [searchTemplate]);
 
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      style={{ opacity: 0, transition: "opacity 0.15s" }}
+    >
       <head>
         <HeadContent />
         <style dangerouslySetInnerHTML={{ __html: globalStyles }} />

@@ -1,0 +1,82 @@
+name: Fraud Ops Portal CI
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ["20"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint and format checks
+        run: |
+          pnpm lint
+          pnpm format:check
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [tests]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 30
+    env:
+      ECR_REGISTRY: 123456789.dkr.ecr.af-south-1.amazonaws.com
+      IMAGE_NAME: sentinel/fraud-ops-portal
+      EKS_CLUSTER: sentinel-cluster
+      AWS_REGION: af-south-1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Simulate EKS deployment
+        run: |
+          echo "============================================"
+          echo "  EKS Deployment (Simulated)"
+          echo "  Service: fraud-ops-portal"
+          echo "  Image:   ${{ env.ECR_REGISTRY }}/fraud-ops-portal:${{ github.sha }}"
+          echo "============================================"
+          echo ""
+          echo "\$ aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER }}"
+          echo "\$ docker push ${{ env.ECR_REGISTRY }}/fraud-ops-portal:${{ github.sha }}"
+          echo "\$ kubectl set image deployment/fraud-ops-portal fraud-ops-portal=${{ env.ECR_REGISTRY }}/fraud-ops-portal:${{ github.sha }} -n staging"
+          echo "\$ kubectl rollout status deployment/fraud-ops-portal -n staging --timeout=300s"
+          echo "\$ curl -f https://fraud-ops-portal.staging.sentinel.internal/health"
+          echo ""
+          echo "Deployment simulation complete."
